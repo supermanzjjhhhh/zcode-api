@@ -130,7 +130,7 @@ describe("buildStartPlanSystem (bundle assembleSystemMessages)", () => {
     expect(dynamic.text).toContain("- Is a git repository: no");
   });
 
-  it("appends client system blocks AFTER the official blocks, stripped of cache_control", () => {
+  it("folds client system blocks INTO the last official block (4th block = 3012)", () => {
     const blocks = buildStartPlanSystem(
       [
         { type: "text", text: "User rule", cache_control: { type: "ephemeral" } },
@@ -141,9 +141,9 @@ describe("buildStartPlanSystem (bundle assembleSystemMessages)", () => {
       ENV,
       "zai",
     );
-    expect(blocks).toHaveLength(5);
-    expect(blocks[3]).toEqual({ type: "text", text: "User rule" });
-    expect(blocks[4]).toEqual({ type: "text", text: "raw string block" });
+    expect(blocks).toHaveLength(3);
+    expect(blocks[2].text).toContain("User rule\n\nraw string block");
+    expect(blocks[2].cache_control).toEqual({ type: "ephemeral" });
   });
 
   it("returns only the 3 official blocks for absent system", () => {

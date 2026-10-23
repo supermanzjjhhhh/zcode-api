@@ -135,7 +135,13 @@ export function buildStartPlanSystem(
     { type: "text", text: stable, cache_control: { ...EPHEMERAL } },
     { type: "text", text: `\n\n${dynamic}`, cache_control: { ...EPHEMERAL } },
   ];
-  return [...official, ...normalizeUserSystem(existingSystem)];
+  // The gateway rejects a 4th system block with 3012 "unusual activity", so
+  // client text cannot ride in its own block: fold it into the last official
+  // one (verified live — text content is irrelevant, only the shape matters).
+  const client = normalizeUserSystem(existingSystem);
+  if (client.length === 0) return official;
+  const [last, ...rest] = official.slice().reverse();
+  return [...rest.reverse(), { ...last, text: `${last.text}\n\n${client.map((b) => b.text).join("\n\n")}` }];
 }
 
 /**

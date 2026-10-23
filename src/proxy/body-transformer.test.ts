@@ -293,8 +293,9 @@ describe("transformRequestBody — start-plan system (Anthropic)", () => {
 
     const out = withEnvPromptVars(() => transformRequestBody(body, { format: "anthropic", startPlan: true, provider: "bigmodel" }));
     const parsed = JSON.parse(out as string);
-    expect(parsed.system).toHaveLength(4);
-    expect(parsed.system[3]).toEqual({ type: "text", text: "User rule" });
+    expect(parsed.system).toHaveLength(3);
+    expect(parsed.system[2].text).toContain("User rule");
+    expect(parsed.system[2].cache_control).toEqual({ type: "ephemeral" });
   });
 
   it("omits the powered-by line when body.model is missing", () => {
@@ -337,7 +338,7 @@ describe("transformRequestBody — start-plan system (Anthropic)", () => {
     expect(parsed.system[2].text).not.toContain("powered by the model named");
   });
 
-  it("preserves client system text after ZCode's official blocks", () => {
+  it("folds client system text into ZCode's official blocks", () => {
     const body = JSON.stringify({
       model: "glm-5.2",
       system: "User rule",
@@ -347,8 +348,8 @@ describe("transformRequestBody — start-plan system (Anthropic)", () => {
     const out = withEnvPromptVars(() => transformRequestBody(body, { format: "anthropic", startPlan: true, provider: "bigmodel" }));
     const parsed = JSON.parse(out as string);
 
-    expect(parsed.system).toHaveLength(4);
-    expect(parsed.system[3]).toEqual({ type: "text", text: "User rule" });
+    expect(parsed.system).toHaveLength(3);
+    expect(parsed.system[2].text).toContain("User rule");
   });
 });
 
